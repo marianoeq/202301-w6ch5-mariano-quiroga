@@ -31,3 +31,20 @@ AÑADIMOS un front con REDUX testado
 - Editar 'thing'
 
 - Página de detalle
+
+* Dudas
+
+```
+  write(newThing: knowledge) {
+    return fs.readFile(file, 'utf-8').then((data) => {
+      const dataParsed: knowledge[] = JSON.parse(data);
+      const id = dataParsed.length;
+      newThing.id = (id + 1).toString();
+      const dataAdded = JSON.stringify(dataParsed.push(newThing));
+      console.log(dataParsed);
+      return fs.writeFile(file, dataAdded, 'utf-8');
+    });
+
+```
+
+- Porque en linea const dataAdded no puedo hacer push del nuevo dato

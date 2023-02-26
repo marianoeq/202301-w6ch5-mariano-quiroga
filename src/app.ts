@@ -1,7 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-
+import { thingsRouter } from './router/things.router.js';
 export const app = express();
 app.disable('x-powered-by');
 
@@ -16,7 +16,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/things');
+app.use('/things', thingsRouter);
 
 app.get('/', (req, res) => {
   res.json({});

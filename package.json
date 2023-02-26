@@ -5,10 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "cross-env PORT=4500 node ./dist/index.js",
-    "nodemon": "cross-env PORT=4500 nodemon ./dist/index.js",
+    "start": "cross-env PORT=4040 node ./dist/index.js",
+    "nodemon": "cross-env PORT=4040 nodemon ./dist/index.js",
     "build": "tsc -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:prod": "jest --watchAll --coverage --watchAll=false"
   },
   "keywords": [
     "Node",
