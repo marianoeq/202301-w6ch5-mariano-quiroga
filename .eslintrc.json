@@ -6,7 +6,11 @@
   "extends": "xo",
   "overrides": [
     {
-      "extends": ["xo-typescript", "prettier"],
+      "extends": [
+        "xo-typescript",
+        "plugin:@typescript-eslint/recommended",
+        "prettier"
+      ],
       "files": ["*.ts", "*.tsx"]
     }
   ],

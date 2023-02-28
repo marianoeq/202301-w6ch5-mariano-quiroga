@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import { thingsRouter } from './router/things.router.js';
@@ -12,10 +12,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
-app.use((req, res, next) => {
+app.use((_req, _res, next) => {
+  console.log('soy un middleware');
   next();
 });
-
+//Si tuviera mas rutas, tengo que crear otra linea como la de abajo pero con el nombre de la nueva ruta y luego el nombre del archivo del router.
 app.use('/things', thingsRouter);
 
 app.get('/', (req, res) => {
@@ -31,3 +32,8 @@ app.post('/', (req, res) => {
 app.patch('/');
 app.patch('/:id');
 app.delete('/:id');
+
+app.use((_error: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.log('soy el middleware de errores');
+  res.json();
+});

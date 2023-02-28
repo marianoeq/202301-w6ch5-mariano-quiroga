@@ -1,29 +1,39 @@
-import { Request, Response } from 'express';
-import { ThingsFileRepo } from '../repository/things.file.repo.js';
+import { NextFunction, Request, Response } from 'express';
+import { knowledge } from '../entities/things.models.js';
+import { Repo } from '../repository/repo.interface.js';
 
 export class ThingsControllers {
-  constructor(public repo: ThingsFileRepo) {}
+  constructor(public repo: Repo<knowledge>) {}
 
-  getAllThings(req: Request, res: Response) {
-    this.repo.read().then((data) => {
-      res.json(data);
-    });
+  async getAllThings(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await this.repo.query();
+      res.json({ results: data });
+    } catch (error) {
+      next(error);
+    }
   }
-  async getThingById(req: Request, res: Response) {
-    const id = await this.repo.readById(Number(req.params.id));
-    res.json(id);
+  async getThingById(req: Request, res: Response, next: NextFunction) {
+    const data = await this.repo.queryId(Number(req.params.id));
+    res.json({ results: [data] });
   }
-  postThing(req: Request, res: Response) {
-    this.repo.write(req.body);
-    res.send(`<p>Data Added</>`);
+  async postThing(req: Request, res: Response, next: NextFunction) {
+    const data = await this.repo.create(req.body);
+    res.json({ results: [data] });
   }
-  updateThing(req: Request, res: Response) {
-    this.repo.update(Number(req.params.id), req.body).then();
 
-    res.send(`<p>Data Updated</>`);
+  updateThing(req: Request, res: Response, next: NextFunction) {
+    try {
+      req.params.id = req.body.id ? req.params.id : req.body.id;
+      this.repo.update(req.body).then((data) => {
+        res.json({ results: [data] });
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-  deleteThing(req: Request, res: Response) {
-    this.repo.delete(Number(req.params.id));
-    res.send(`<p>Data Deleted</p>`);
+  async deleteThing(req: Request, res: Response, next: NextFunction) {
+    await this.repo.delete(Number(req.params.id));
+    res.json({ results: [] });
   }
 }

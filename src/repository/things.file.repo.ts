@@ -1,53 +1,52 @@
 import fs from 'fs/promises';
-
+import { knowledge } from '../entities/things.models.js';
+import { Repo } from './repo.interface.js';
 const file = './data/data.json';
-type knowledge = {
-  id: number;
-  name: string;
-};
-export class ThingsFileRepo {
-  read() {
-    return fs.readFile(file, { encoding: 'utf-8' }).then((data) => {
-      return JSON.parse(data) as any[];
-    });
+
+export class ThingsFileRepo implements Repo<knowledge> {
+  async query(): Promise<knowledge[]> {
+    const data: string = await fs.readFile(file, { encoding: 'utf-8' });
+    return JSON.parse(data) as knowledge[];
   }
 
-  async readById(id: knowledge['id']) {
+  async queryId(id: number): Promise<knowledge> {
     const data = await fs.readFile(file, 'utf-8');
 
-    const dataParsed = JSON.parse(data);
+    const dataParsed: knowledge[] = JSON.parse(data);
     const result = dataParsed.find((item: knowledge) => item.id === id);
+    if (!result) {
+      throw new Error('ID no found');
+    }
     return result;
   }
 
-  write(newThing: knowledge) {
-    return fs.readFile(file, 'utf-8').then((data) => {
-      const dataParsed: knowledge[] = JSON.parse(data);
-
-      const id = dataParsed.length;
-
-      newThing.id = id + 1;
-
-      const dataAdded = JSON.stringify([...dataParsed, newThing]);
-
-      return fs.writeFile(file, dataAdded, 'utf-8');
-    });
+  async create(newThing: Partial<knowledge>): Promise<knowledge> {
+    const data = await fs.readFile(file, 'utf-8');
+    const dataParsed: knowledge[] = JSON.parse(data);
+    const id = dataParsed.length;
+    newThing.id = id + 1;
+    const dataAdded = JSON.stringify([...dataParsed, newThing]);
+    await fs.writeFile(file, dataAdded, 'utf-8');
+    return newThing as knowledge;
   }
-  update(id: knowledge['id'], newThing: knowledge) {
-    return fs.readFile(file, 'utf-8').then((data) => {
-      const dataParsed: knowledge[] = JSON.parse(data);
-      newThing.id = id;
-
-      const idFound = dataParsed.map((item: knowledge) =>
-        item.id === id ? (item = newThing) : item
-      );
-
-      const finalData = JSON.stringify(idFound);
-      return fs.writeFile(file, finalData, 'utf-8');
+  async update(newThing: Partial<knowledge>): Promise<knowledge> {
+    if (!newThing.id) throw new Error('Not valid data');
+    const data: string = await fs.readFile(file, 'utf-8');
+    console.log(data);
+    const dataParsed: knowledge[] = JSON.parse(data);
+    let updatedThing: knowledge = {} as knowledge;
+    const updatedData = dataParsed.map((item: knowledge) => {
+      if (item.id === newThing.id) {
+        updatedThing = { ...item, ...newThing };
+        return updatedThing;
+      }
+      return item;
     });
+    if (!updatedThing.id) throw new Error('Id not found');
+    await fs.writeFile(file, JSON.stringify(updatedData), 'utf-8');
+    return updatedThing as knowledge;
   }
-
-  async delete(id: knowledge['id']) {
+  async delete(id: number) {
     const data = await fs.readFile(file, 'utf-8');
     const dataParsed = JSON.parse(data);
     const dataFiltered = dataParsed.filter((item: knowledge) => item.id !== id);
